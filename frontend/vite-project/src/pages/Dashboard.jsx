@@ -1,26 +1,33 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { getEntries, createEntry, deleteEntry } from "../api/entries";
+
 import TopBar from "../components/TopBar";
 import AuthorNote from "../components/AuthorNote";
 import EntryCard from "../components/EntryCard";
-import { enablePrivateSpace } from "../api/private";
 
 const Dashboard = () => {
   const { token } = useContext(AuthContext);
+
   const [entries, setEntries] = useState([]);
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
-  const [showPrivatePrompt, setShowPrivatePrompt] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadEntries = async () => {
-    const res = await getEntries(token);
-    setEntries(res.data);
+    try {
+      const res = await getEntries(token);
+      setEntries(res.data);
+    } catch (err) {
+      console.error("Failed to load entries");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addEntry = async () => {
     if (!text.trim()) return;
-    await createEntry(token, { content: text });
+    await createEntry(token, { content: text, isLocked: false });
     setText("");
     loadEntries();
   };
@@ -30,39 +37,15 @@ const Dashboard = () => {
     loadEntries();
   };
 
-  const setupPrivate = async () => {
-  await enablePrivateSpace(token, {
-    trigger: "unlock",
-    pin: "1234"
-  });
-  alert("Private space enabled");
-};
-
   useEffect(() => {
-    loadEntries();
-  }, []);
+    if (token) loadEntries();
+  }, [token]);
 
-  useEffect(() => {
-  // example trigger, later user-defined
-  if (search.trim().toLowerCase() === "unlock") {
-    setShowPrivatePrompt(true);
-    setSearch(""); // clear immediately
-  }
-}, [search]);
-
-{showPrivatePrompt && (
-  <PrivatePrompt
-    onClose={() => setShowPrivatePrompt(false)}
-    onSuccess={() => {
-      setShowPrivatePrompt(false);
-      console.log("Private space unlocked (for now)");
-    }}
-  />
-)}
-
-  const filtered = entries.filter(e =>
+  const filteredEntries = entries.filter((e) =>
     e.content.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) return <p>Loading…</p>;
 
   return (
     <div className="dashboard">
@@ -70,15 +53,21 @@ const Dashboard = () => {
       <AuthorNote />
 
       <textarea
-        value={text}
-        onChange={e => setText(e.target.value)}
         placeholder="Write something..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
       />
       <button onClick={addEntry}>Save</button>
 
-      {filtered.map(e => (
-        <EntryCard key={e._id} entry={e} onDelete={removeEntry} />
-      ))}
+      <div>
+        {filteredEntries.map((entry) => (
+          <EntryCard
+            key={entry._id}
+            entry={entry}
+            onDelete={removeEntry}
+          />
+        ))}
+      </div>
     </div>
   );
 };

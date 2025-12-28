@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "npm run --prefix vite-project dev"
+  },
   "dependencies": {
     "react-router-dom": "^7.11.0"
   }

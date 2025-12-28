@@ -36,7 +36,7 @@ const entrySchema = new mongoose.Schema(
 
     themeOverride: {
       type: String,
-      enum: ["light", "dark"],
+      enum: ["light", "dark", null],
       default: null
     },
 
