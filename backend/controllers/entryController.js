@@ -18,6 +18,15 @@ exports.getEntries = async (req, res) => {
   res.json(entries);
 };
 
+exports.getLockedEntries = async (req, res) => {
+  const entries = await Entry.find({
+    user: req.user._id,
+    isLocked: true
+  }).sort({ createdAt: -1 });
+
+  res.json(entries);
+};
+
 // Delete entry
 exports.deleteEntry = async (req, res) => {
   await Entry.findOneAndDelete({

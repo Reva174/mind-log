@@ -15,6 +15,15 @@ exports.createEntry = async (req, res) => {
   res.status(201).json(entry);
 };
 
+exports.getLockedEntries = async (req, res) => {
+  const entries = await Entry.find({
+    user: req.user._id,
+    isLocked: true
+  }).sort({ createdAt: -1 });
+
+  res.json(entries);
+};
+
 
 export const deleteEntry = (token, id) =>
   api.delete(`/api/entries/${id}`, {

@@ -25,12 +25,28 @@ const Dashboard = () => {
     }
   };
 
-  const addEntry = async () => {
-    if (!text.trim()) return;
-    await createEntry(token, { content: text, isLocked: false });
+  const saveEntry = async () => {
+  if (!text.trim()) return;
+
+  try {
+    await createEntry(token, {
+      content: text,
+      isLocked: privateMode, // 🔑 THIS is the magic
+    });
+
     setText("");
-    loadEntries();
-  };
+
+    if (privateMode) {
+      loadLockedEntries();
+    } else {
+      loadEntries();
+    }
+  } catch (err) {
+    console.error("Failed to save entry", err);
+    alert("Could not save entry");
+  }
+};
+
 
   const removeEntry = async (id) => {
     await deleteEntry(token, id);
@@ -57,7 +73,9 @@ const Dashboard = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button onClick={addEntry}>Save</button>
+      <button onClick={saveEntry}>
+        {privateMode ? "Save to Private Space" : "Save"}
+      </button>
 
       <div>
         {filteredEntries.map((entry) => (
