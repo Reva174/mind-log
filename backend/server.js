@@ -8,6 +8,7 @@ const authRoutes = require("./routes/auth");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/api/entries", require("./routes/entries"));
 
 connectDB();
 
@@ -16,6 +17,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/private", require("./routes/private"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -20,9 +20,10 @@ const userSchema = new mongoose.Schema(
     },
 
     privateSpace: {
-      enabled: { type: Boolean, default: false },
-      trigger: { type: String },
-      hasSeenAuthorNote: { type: Boolean, default: false }
+  enabled: { type: Boolean, default: false },
+  trigger: { type: String, default: "" },   // secret word
+  pinHash: { type: String, default: "" },   // hashed PIN
+  hasSeenAuthorNote: { type: Boolean, default: false }
     }
   },
   { timestamps: true }
