@@ -1,10 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { getEntries, createEntry, deleteEntry } from "../api/entries";
+import { getEntries, createEntry, deleteEntry, getLockedEntries } from "../api/entries";
 
 import TopBar from "../components/TopBar";
 import AuthorNote from "../components/AuthorNote";
 import EntryCard from "../components/EntryCard";
+import PrivateAuthorNote from "../components/PrivateAuthorNote";
+
 
 const Dashboard = () => {
   const { token } = useContext(AuthContext);
@@ -13,7 +15,12 @@ const Dashboard = () => {
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [ showPrivateNote, setShowPrivateNote ] = useState(false);
+  const [privateMode, setPrivateMode] = useState(false);
+  const [lockedEntries, setLockedEntries] = useState([]);
 
+
+  
   const loadEntries = async () => {
     try {
       const res = await getEntries(token);
@@ -24,6 +31,16 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  const loadLockedEntries = async () => {
+  try {
+    const res = await getLockedEntries(token);
+    setLockedEntries(res.data);
+  } catch (err) {
+    console.error("Failed to load locked entries");
+  }
+};
+
 
   const saveEntry = async () => {
   if (!text.trim()) return;
@@ -67,6 +84,12 @@ const Dashboard = () => {
     <div className="dashboard">
       <TopBar search={search} setSearch={setSearch} />
       <AuthorNote />
+      {privateMode && showPrivateNote && (
+  <PrivateAuthorNote
+    onClose={() => setShowPrivateNote(false)}
+  />
+)}
+
 
       <textarea
         placeholder="Write something..."
@@ -78,7 +101,15 @@ const Dashboard = () => {
       </button>
 
       <div>
-        {filteredEntries.map((entry) => (
+      {privateMode
+        ? lockedEntries.map((entry) => (
+          <EntryCard
+            key={entry._id}
+            entry={entry}
+            onDelete={removeEntry}
+          />
+        ))
+      : filteredEntries.map((entry) => (
           <EntryCard
             key={entry._id}
             entry={entry}
@@ -86,6 +117,7 @@ const Dashboard = () => {
           />
         ))}
       </div>
+
     </div>
   );
 };

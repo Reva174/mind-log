@@ -41,3 +41,9 @@ exports.verifyPin = async (req, res) => {
 
   res.json({ success: true });
 };
+
+exports.markAuthorNoteSeen = async (req, res) => {
+  req.user.privateSpace.hasSeenAuthorNote = true;
+  await req.user.save();
+  res.json({ success: true });
+};
