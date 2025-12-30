@@ -5,3 +5,10 @@ export const registerUser = (data) =>
 
 export const loginUser = (data) =>
   api.post("/api/auth/login", data);
+
+export const getMe = (token) =>
+  api.get("/api/auth/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });

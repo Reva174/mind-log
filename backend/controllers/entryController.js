@@ -2,14 +2,15 @@ const Entry = require("../models/Entry");
 
 // Create entry
 exports.createEntry = async (req, res) => {
+  const { content, isLocked } = req.body;
   const entry = await Entry.create({
     user: req.user._id,
-    content: req.body.content,
-    title: req.body.title || "",
-    emotion: req.body.emotion || "neutral"
+    content,
+    isLocked: Boolean(isLocked) 
   });
   res.status(201).json(entry);
 };
+
 
 // Get all entries (non-locked for now)
 exports.getEntries = async (req, res) => {
